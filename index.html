@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Studio Pro - Veo 3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+        :root {
+            --bg-color-light: #f8fafc;
+            --text-color-light: #1e293b;
+            --card-bg-color-light: #ffffff;
+            --border-color-light: #e2e8f0;
+            --tool-hover-bg-light: #f1f5f9;
+            --tool-active-bg-light: #e2e8f0;
+            --accent-color: #6366f1;
+            --accent-hover: #5855eb;
+
+            --bg-color-dark: #0f172a;
+            --text-color-dark: #f1f5f9;
+            --card-bg-color-dark: #1e293b;
+            --border-color-dark: #334155;
+            --tool-hover-bg-dark: #334155;
+            --tool-active-bg-dark: #475569;
+        }
+
+        html {
+            font-family: 'Inter', sans-serif;
+        }
+
+        html.light {
+            --bg-color: var(--bg-color-light);
+            --text-color: var(--text-color-light);
+            --card-bg-color: var(--card-bg-color-light);
+            --border-color: var(--border-color-light);
+            --tool-hover-bg: var(--tool-hover-bg-light);
+            --tool-active-bg: var(--tool-active-bg-light);
+        }
+
+        html.dark {
+            --bg-color: var(--bg-color-dark);
+            --text-color: var(--text-color-dark);
+            --card-bg-color: var(--card-bg-color-dark);
+            --border-color: var(--border-color-dark);
+            --tool-hover-bg: var(--tool-hover-bg-dark);
+            --tool-active-bg: var(--tool-active-bg-dark);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-color) 0%, var(--card-bg-color) 100%);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .tool-button {
+            background-color: var(--card-bg-color);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tool-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .tool-button:hover::before {
+            left: 100%;
+        }
+        
+        .tool-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tool-button:hover:not(:disabled) {
+            background-color: var(--tool-hover-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: var(--accent-color);
+        }
+        
+        .tool-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .tool-button.active {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            border-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+        
+        #canvas {
+            cursor: crosshair;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        #text-input-container {
+            position: absolute;
+            display: none;
+            z-index: 20;
+        }
+
+        #text-input {
+            border: 3px solid var(--accent-color);
+            outline: none;
+            padding: 8px 12px;
+            font-size: 18px;
+            font-weight: 500;
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            min-width: 200px;
+        }
+
+        #info-modal, #json-prompt-modal {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        #info-modal.hidden, #json-prompt-modal.hidden {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+        
+        .placeholder-icon {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(1deg); }
+            50% { transform: translateY(-10px) rotate(0deg); }
+            75% { transform: translateY(-20px) rotate(-1deg); }
+        }
+
+        .gradient-border {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            padding: 3px;
+            border-radius: 16px;
+        }
+
+        .gradient-border-inner {
+            background: var(--card-bg-color);
+            border-radius: 13px;
+        }
+
+        .control-group {
+            background: var(--card-bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .control-group:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .shortcuts-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card-bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 11px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .shortcuts-hint:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        
+        .shortcuts-hint.fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+        
+        .ai-prompt-button {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: white;
+        }
+        
+        .loader {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-left: 5px solid var(--accent-color);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            font-weight: 500;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            border-left-color: #ef4444; /* red-500 */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 antialiased">
+
+    <div class="w-full max-w-7xl mx-auto flex flex-col gap-6">
+        <!-- Header / Toolbar -->
+        <header class="gradient-border">
+            <div class="gradient-border-inner p-4 flex items-center justify-between gap-4 flex-wrap">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Annotation Studio</h1>
+                        <p class="text-sm opacity-70">for <span class="text-[var(--accent-color)] font-semibold">Veo 3</span></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2 flex-wrap mx-auto">
+                    <!-- File Controls -->
+                    <div class="control-group">
+                        <button id="upload-btn" class="tool-button p-3 rounded-lg" title="Upload Image (Ctrl+O)">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                        </button>
+                        <input type="file" id="image-loader" class="hidden" accept="image/*">
+                        <button id="clear-all-btn" class="tool-button p-3 rounded-lg" title="Clear All (Ctrl+Shift+C)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Drawing Tools -->
+                    <div class="control-group">
+                        <button class="tool-button p-3 rounded-lg" data-tool="arrow" title="Straight Arrow (A)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                        <button class="tool-button p-3 rounded-lg" data-tool="curved-arrow" title="Curved Path (S)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 18c0-3.5 1.5-7 7-7s7 3.5 7 7"/></svg>
+                        </button>
+                        <button class="tool-button p-3 rounded-lg" data-tool="pencil" title="Freehand Line (D)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                        </button>
+                        <button class="tool-button p-3 rounded-lg" data-tool="text" title="Add Text (T)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </button>
+                        <button class="tool-button p-3 rounded-lg" data-tool="circle" title="Circle (C)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Action Tools -->
+                    <div class="control-group">
+                        <button class="tool-button p-3 rounded-lg" data-tool="undo" title="Undo (Ctrl+Z)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 12"/><path d="M3 3v6h6"/></svg>
+                        </button>
+                        <button class="tool-button p-3 rounded-lg" data-tool="redo" title="Redo (Ctrl+Y)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 12"/><path d="M21 3v6h-6"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- Style Controls -->
+                    <div class="control-group">
+                        <label class="text-xs font-medium opacity-70">Color:</label>
+                        <input type="color" id="color-picker" value="#6366f1" class="w-8 h-8 border-2 border-[var(--border-color)] rounded-lg cursor-pointer" title="Select Color">
+                        
+                        <label class="text-xs font-medium opacity-70 ml-2">Width:</label>
+                        <input type="range" id="line-width" class="slider w-16" min="1" max="10" value="3" title="Line Width">
+                        
+                        <label class="text-xs font-medium opacity-70 ml-2">Opacity:</label>
+                        <input type="range" id="opacity" class="slider w-16" min="0.1" max="1" step="0.1" value="1" title="Opacity">
+                    </div>
+
+                    <button id="theme-toggle" class="tool-button p-3 rounded-lg" title="Toggle Theme">
+                        <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                        <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </button>
+                    
+                    <button id="export-btn" class="export-button" title="Export Image (Ctrl+S)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        Export
+                    </button>
+
+                    <button id="info-btn" class="tool-button p-3 rounded-lg" title="Help & Info">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- AI Prompt Generator -->
+        <div id="ai-prompt-section" class="gradient-border-inner p-4 rounded-xl border-2 border-[var(--border-color)] flex items-center gap-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--accent-color)] flex-shrink-0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+            <input type="text" id="ai-prompt-input" class="w-full bg-transparent focus:outline-none" placeholder="Describe the desired animation to generate a text prompt...">
+            <button id="generate-prompt-btn" class="ai-prompt-button font-semibold px-5 py-2 rounded-lg whitespace-nowrap flex items-center gap-2">
+                <span id="generate-btn-text">Generate Prompt</span>
+                <div id="generate-loader" class="loader hidden"></div>
+            </button>
+        </div>
+
+        <!-- Main Canvas -->
+        <main id="canvas-container" class="gradient-border w-full h-[70vh] flex items-center justify-center overflow-hidden relative">
+            <div class="gradient-border-inner w-full h-full flex items-center justify-center relative">
+                <canvas id="canvas" class="hidden max-w-full max-h-full"></canvas>
+                <div id="text-input-container">
+                    <input type="text" id="text-input" placeholder="Type your annotation..." />
+                </div>
+                <div id="placeholder" class="text-center p-12 flex flex-col items-center justify-center">
+                    <div class="placeholder-icon w-32 h-32 text-gray-400 dark:text-gray-500 mb-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                            <circle cx="9" cy="9" r="2"/>
+                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        Create Your Animation Prompts
+                    </h2>
+                    <p class="text-lg text-gray-500 dark:text-gray-400 mb-6 max-w-md">
+                        Upload an image and add arrows and annotations to direct the motion in Veo 3.
+                    </p>
+                    <div class="flex gap-4">
+                        <button onclick="document.getElementById('image-loader').click()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:transform hover:scale-105 transition-all duration-200 shadow-lg">
+                            Upload Image
+                        </button>
+                        <button onclick="document.getElementById('info-btn').click()" class="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:transform hover:scale-105 transition-all duration-200">
+                            View Guide
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3"></div>
+
+    <!-- Shortcuts Hint -->
+    <div class="shortcuts-hint">
+        <div class="font-semibold mb-1">Keyboard Shortcuts:</div>
+        <div>A: Arrow • S: Curve • D: Draw • T: Text • C: Circle</div>
+        <div>Ctrl+Z: Undo • Ctrl+Y: Redo • Ctrl+S: Export</div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden">
+        <div class="gradient-border max-w-3xl w-full" id="info-modal-content">
+            <div class="gradient-border-inner p-8 relative">
+                <button id="close-modal-btn" class="absolute top-6 right-6 text-gray-400 hover:text-[var(--text-color)] transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        Annotation Studio Pro Guide
+                    </h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-300">
+                        Create perfect visual instructions for <strong>Google's Veo 3</strong>
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-bold text-xl mb-4 text-[var(--accent-color)]">🎯 Core Tools</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-start gap-3">
+                                <span class="font-semibold bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded text-xs">STRAIGHT ARROW</span>
+                                <span>For direct, linear movements (e.g., a car driving forward).</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="font-semibold bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded text-xs">CURVED PATH</span>
+                                <span>For smooth, curved trajectories (e.g., a bouncing ball). No arrowhead is added.</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="font-semibold bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded text-xs">FREEHAND LINE</span>
+                                <span>For complex, custom-drawn movements.</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="font-semibold bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-2 py-1 rounded text-xs">TEXT</span>
+                                <span>For specific instructions (e.g., "slowly fade out").</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="font-semibold bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300 px-2 py-1 rounded text-xs">CIRCLE</span>
+                                <span>For highlighting important areas.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-xl mb-4 text-[var(--accent-color)]">⚡ Pro Tips</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <strong>🎨 Colors & Styles:</strong> Use different colors to distinguish types of motion.
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <strong>📝 Descriptive Text:</strong> Add keywords like "fast," "smooth," "rotate."
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <strong>🎯 Precision:</strong> Draw from the exact point where the movement should start.
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <strong>💾 Exporting:</strong> Save in high quality for the best results in Veo 3.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-[var(--border-color)]">
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            <strong>Workflow:</strong> Upload Image → Add Annotations → Export → Use in Veo 3
+                        </p>
+                        <div class="flex justify-center gap-4">
+                            <span class="text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full font-medium">
+                                v2.3
+                            </span>
+                            <span class="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full">
+                                Optimized for Veo 3
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JSON Prompt Modal -->
+    <div id="json-prompt-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden">
+        <div class="gradient-border max-w-2xl w-full" id="json-modal-content">
+            <div class="gradient-border-inner p-8 relative">
+                <button id="close-json-modal-btn" class="absolute top-6 right-6 text-gray-400 hover:text-[var(--text-color)] transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <h2 class="text-2xl font-bold mb-4">Generated Veo 3 Prompt</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Here is a structured JSON prompt generated by the AI. Copy this and use it with your image in Veo 3.</p>
+                <div class="bg-[var(--bg-color)] p-4 rounded-lg max-h-64 overflow-y-auto">
+                    <pre><code id="json-output" class="text-sm"></code></pre>
+                </div>
+                <button id="copy-json-btn" class="mt-6 w-full ai-prompt-button font-semibold px-5 py-3 rounded-lg flex items-center justify-center gap-2">
+                    Copy JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        class AnnotationStudio {
+            constructor() {
+                this.initializeElements();
+                this.initializeState();
+                this.setupEventListeners();
+                this.init();
+            }
+
+            initializeElements() {
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.imageLoader = document.getElementById('image-loader');
+                this.uploadBtn = document.getElementById('upload-btn');
+                this.clearAllBtn = document.getElementById('clear-all-btn');
+                this.exportBtn = document.getElementById('export-btn');
+                this.placeholder = document.getElementById('placeholder');
+                this.canvasContainer = document.getElementById('canvas-container');
+                this.toolButtons = document.querySelectorAll('.tool-button[data-tool]');
+                this.colorPicker = document.getElementById('color-picker');
+                this.lineWidthSlider = document.getElementById('line-width');
+                this.opacitySlider = document.getElementById('opacity');
+                this.themeToggle = document.getElementById('theme-toggle');
+                this.textInputContainer = document.getElementById('text-input-container');
+                this.textInput = document.getElementById('text-input');
+                this.infoBtn = document.getElementById('info-btn');
+                this.infoModal = document.getElementById('info-modal');
+                this.closeModalBtn = document.getElementById('close-modal-btn');
+                // AI Elements
+                this.aiPromptInput = document.getElementById('ai-prompt-input');
+                this.generatePromptBtn = document.getElementById('generate-prompt-btn');
+                this.generateBtnText = document.getElementById('generate-btn-text');
+                this.generateLoader = document.getElementById('generate-loader');
+                // JSON Modal Elements
+                this.jsonPromptModal = document.getElementById('json-prompt-modal');
+                this.closeJsonModalBtn = document.getElementById('close-json-modal-btn');
+                this.jsonOutput = document.getElementById('json-output');
+                this.copyJsonBtn = document.getElementById('copy-json-btn');
+                // Notification Element
+                this.notificationContainer = document.getElementById('notification-container');
+            }
+
+            initializeState() {
+                this.image = null;
+                this.currentTool = 'arrow';
+                this.annotations = [];
+                this.history = [];
+                this.historyStep = -1;
+                this.isDrawing = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.isMovingAnnotation = false;
+                this.selectedAnnotation = null;
+                this.dragOffsetX = 0;
+                this.dragOffsetY = 0;
+                this.curvePoints = [];
+            }
+
+            init() {
+                this.setupCanvasSize();
+                this.updateTheme();
+                this.setActiveTool('arrow');
+                this.clearAllBtn.disabled = true;
+                this.exportBtn.disabled = true;
+                this.generatePromptBtn.disabled = true;
+                
+                // Fade out shortcuts hint
+                setTimeout(() => {
+                    document.querySelector('.shortcuts-hint').classList.add('fade-out');
+                }, 5000);
+            }
+
+            setupCanvasSize() {
+                const container = this.canvasContainer.querySelector('.gradient-border-inner');
+                const { width, height } = container.getBoundingClientRect();
+                this.canvas.width = width; 
+                this.canvas.height = height;
+                if (this.image) this.redrawCanvas();
+            }
+
+            setupEventListeners() {
+                // Window events
+                window.addEventListener('resize', () => this.setupCanvasSize());
+                
+                // File handling
+                this.uploadBtn.addEventListener('click', () => this.imageLoader.click());
+                this.imageLoader.addEventListener('change', (e) => this.handleImageUpload(e));
+                this.clearAllBtn.addEventListener('click', () => this.clearAll());
+                this.exportBtn.addEventListener('click', () => this.exportImage());
+
+                // Drag and drop
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    this.canvasContainer.addEventListener(eventName, this.preventDefaults, false);
+                });
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    this.canvasContainer.addEventListener(eventName, () => {
+                        this.canvasContainer.style.borderColor = 'var(--accent-color)';
+                    }, false);
+                });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    this.canvasContainer.addEventListener(eventName, () => {
+                        this.canvasContainer.style.borderColor = 'var(--border-color)';
+                    }, false);
+                });
+                this.canvasContainer.addEventListener('drop', (e) => this.handleDrop(e), false);
+
+                // Canvas events
+                this.canvas.addEventListener('mousedown', (e) => this.startAction(e));
+                this.canvas.addEventListener('mousemove', (e) => this.moveAction(e));
+                this.canvas.addEventListener('mouseup', (e) => this.endAction(e));
+                this.canvas.addEventListener('mouseout', (e) => this.endAction(e));
+
+                // Tool buttons
+                this.toolButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const tool = button.dataset.tool;
+                        if (tool === 'undo') this.undo();
+                        else if (tool === 'redo') this.redo();
+                        else this.setActiveTool(tool);
+                    });
+                });
+
+                // Controls
+                this.themeToggle.addEventListener('click', () => this.toggleTheme());
+                this.textInput.addEventListener('keydown', (e) => this.handleTextInput(e));
+
+                // Modals
+                this.infoBtn.addEventListener('click', () => this.infoModal.classList.remove('hidden'));
+                this.closeModalBtn.addEventListener('click', () => this.infoModal.classList.add('hidden'));
+                this.infoModal.addEventListener('click', (e) => {
+                    if (e.target === this.infoModal) this.infoModal.classList.add('hidden');
+                });
+                
+                this.closeJsonModalBtn.addEventListener('click', () => this.jsonPromptModal.classList.add('hidden'));
+                this.jsonPromptModal.addEventListener('click', (e) => {
+                    if (e.target === this.jsonPromptModal) this.jsonPromptModal.classList.add('hidden');
+                });
+                this.copyJsonBtn.addEventListener('click', () => this.copyJsonToClipboard());
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+                
+                // AI Prompt Generator
+                this.generatePromptBtn.addEventListener('click', () => this.generateTextPrompt());
+            }
+
+            handleKeyboardShortcuts(e) {
+                if (e.target === this.textInput || e.target === this.aiPromptInput) return;
+                
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key.toLowerCase()) {
+                        case 'z':
+                            e.preventDefault();
+                            if (e.shiftKey) this.redo();
+                            else this.undo();
+                            break;
+                        case 'y':
+                            e.preventDefault();
+                            this.redo();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            this.exportImage();
+                            break;
+                        case 'o':
+                            e.preventDefault();
+                            this.imageLoader.click();
+                            break;
+                    }
+                    if (e.shiftKey && e.key.toLowerCase() === 'c') {
+                        e.preventDefault();
+                        this.clearAll();
+                    }
+                } else {
+                    switch(e.key.toLowerCase()) {
+                        case 'a': this.setActiveTool('arrow'); break;
+                        case 's': this.setActiveTool('curved-arrow'); break;
+                        case 'd': this.setActiveTool('pencil'); break;
+                        case 't': this.setActiveTool('text'); break;
+                        case 'c': this.setActiveTool('circle'); break;
+                        case 'escape': 
+                            this.finalizeText();
+                            this.infoModal.classList.add('hidden');
+                            this.jsonPromptModal.classList.add('hidden');
+                            break;
+                    }
+                }
+            }
+
+            preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            handleImageUpload(e) {
+                const file = e.target.files[0];
+                if (file) this.loadImageFile(file);
+            }
+            
+            handleDrop(e) {
+                let file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    this.loadImageFile(file);
+                }
+            }
+
+            loadImageFile(file) {
+                const reader = new FileReader();
+                reader.onload = (event) => this.loadImage(event.target.result);
+                reader.readAsDataURL(file);
+            }
+
+            loadImage(src) {
+                this.image = new Image();
+                this.image.onload = () => {
+                    this.annotations = [];
+                    this.history = [];
+                    this.historyStep = -1;
+                    this.saveState();
+                    this.placeholder.classList.add('hidden');
+                    this.canvas.classList.remove('hidden');
+                    this.clearAllBtn.disabled = false;
+                    this.exportBtn.disabled = false;
+                    this.generatePromptBtn.disabled = false;
+                    this.setupCanvasSize();
+                };
+                this.image.onerror = () => {
+                    const errorMsg = "Error loading image. Please try another file.";
+                    console.error(errorMsg);
+                    this.showNotification(errorMsg, true);
+                    this.image = null;
+                };
+                this.image.src = src;
+            }
+
+            clearAll() {
+                this.annotations = [];
+                this.saveState();
+                this.redrawCanvas();
+            }
+
+            setActiveTool(tool) {
+                this.finalizeText();
+                this.currentTool = tool;
+                this.toolButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.tool === tool);
+                });
+                
+                const cursors = {
+                    'arrow': 'crosshair',
+                    'curved-arrow': 'crosshair',
+                    'pencil': 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236366f1\' stroke-width=\'2\'%3E%3Cpath d=\'M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\'/%3E%3C/svg%3E") 12 12, crosshair',
+                    'text': 'text',
+                    'circle': 'crosshair'
+                };
+                this.canvas.style.cursor = cursors[tool] || 'crosshair';
+            }
+
+            startAction(e) {
+                if (!this.image) return;
+                this.finalizeText();
+                const pos = this.getMousePos(e);
+
+                for (let i = this.annotations.length - 1; i >= 0; i--) {
+                    const ann = this.annotations[i];
+                    if (ann.type === 'text' && this.isPointInTextBounds(pos, ann)) {
+                        this.isMovingAnnotation = true;
+                        this.selectedAnnotation = ann;
+                        this.dragOffsetX = pos.x - ann.x;
+                        this.dragOffsetY = pos.y - ann.y;
+                        this.canvas.style.cursor = 'move';
+                        this.redrawCanvas();
+                        return;
+                    }
+                }
+
+                if (this.currentTool === 'text') {
+                    this.showTextInput(pos.x, pos.y);
+                } else {
+                    this.isDrawing = true;
+                    this.startX = pos.x;
+                    this.startY = pos.y;
+                    
+                    if (this.currentTool === 'pencil') {
+                        this.annotations.push({ 
+                            type: 'pencil', 
+                            color: this.colorPicker.value, 
+                            lineWidth: parseInt(this.lineWidthSlider.value),
+                            opacity: parseFloat(this.opacitySlider.value),
+                            points: [pos] 
+                        });
+                    } else if (this.currentTool === 'curved-arrow') {
+                        this.curvePoints = [pos];
+                    }
+                }
+            }
+
+            moveAction(e) {
+                if (!this.image) return;
+                const pos = this.getMousePos(e);
+
+                if (this.isMovingAnnotation && this.selectedAnnotation) {
+                    this.selectedAnnotation.x = pos.x - this.dragOffsetX;
+                    this.selectedAnnotation.y = pos.y - this.dragOffsetY;
+                    this.redrawCanvas();
+                    return;
+                }
+
+                if (this.isDrawing) {
+                    const color = this.colorPicker.value;
+                    const lineWidth = parseInt(this.lineWidthSlider.value);
+                    const opacity = parseFloat(this.opacitySlider.value);
+
+                    if (this.currentTool === 'pencil') {
+                        const currentPath = this.annotations[this.annotations.length - 1];
+                        currentPath.points.push(pos);
+                        this.redrawCanvas();
+                    } else if (this.currentTool === 'curved-arrow') {
+                        this.curvePoints.push(pos);
+                        this.redrawCanvas();
+                        this.drawTemporaryCurvedArrow(this.curvePoints, color, lineWidth, opacity);
+                    } else {
+                        this.redrawCanvas();
+                        this.ctx.globalAlpha = opacity;
+                        this.ctx.strokeStyle = color;
+                        this.ctx.lineWidth = lineWidth;
+                        
+                        if (this.currentTool === 'arrow') {
+                            this.drawArrow(this.startX, this.startY, pos.x, pos.y);
+                        } else if (this.currentTool === 'circle') {
+                            this.drawCircle(this.startX, this.startY, pos.x, pos.y);
+                        }
+                        
+                        this.ctx.globalAlpha = 1;
+                    }
+                }
+            }
+
+            endAction(e) {
+                if (this.isMovingAnnotation) {
+                    this.isMovingAnnotation = false;
+                    this.selectedAnnotation = null;
+                    this.canvas.style.cursor = this.currentTool === 'text' ? 'text' : 'crosshair';
+                    this.saveState();
+                }
+
+                if (this.isDrawing) {
+                    this.isDrawing = false;
+                    const pos = this.getMousePos(e);
+                    const color = this.colorPicker.value;
+                    const lineWidth = parseInt(this.lineWidthSlider.value);
+                    const opacity = parseFloat(this.opacitySlider.value);
+
+                    if (this.currentTool === 'arrow') {
+                        if (Math.hypot(pos.x - this.startX, pos.y - this.startY) > 10) {
+                            this.annotations.push({ 
+                                type: 'arrow', color, lineWidth, opacity,
+                                startX: this.startX, startY: this.startY, endX: pos.x, endY: pos.y 
+                            });
+                            this.saveState();
+                        }
+                    } else if (this.currentTool === 'curved-arrow') {
+                        if (this.curvePoints.length > 2) {
+                            this.annotations.push({
+                                type: 'curved-arrow', color, lineWidth, opacity,
+                                points: [...this.curvePoints]
+                            });
+                            this.saveState();
+                        }
+                        this.curvePoints = [];
+                    } else if (this.currentTool === 'circle') {
+                        const radius = Math.hypot(pos.x - this.startX, pos.y - this.startY);
+                        if (radius > 10) {
+                            this.annotations.push({
+                                type: 'circle', color, lineWidth, opacity,
+                                centerX: this.startX, centerY: this.startY, radius: radius
+                            });
+                            this.saveState();
+                        }
+                    } else if (this.currentTool === 'pencil') {
+                        const lastPath = this.annotations[this.annotations.length - 1];
+                        if (lastPath && lastPath.points.length < 3) {
+                            this.annotations.pop();
+                        } else {
+                            this.saveState();
+                        }
+                    }
+                    this.redrawCanvas();
+                }
+            }
+
+            showTextInput(x, y) {
+                this.textInputContainer.style.left = `${x}px`;
+                this.textInputContainer.style.top = `${y}px`;
+                this.textInputContainer.style.display = 'block';
+                this.textInput.value = '';
+                this.textInput.focus();
+                this.textInput.dataset.x = x;
+                this.textInput.dataset.y = y;
+            }
+
+            handleTextInput(e) {
+                if (e.key === 'Enter') {
+                    this.finalizeText();
+                    e.preventDefault();
+                } else if (e.key === 'Escape') {
+                    this.textInputContainer.style.display = 'none';
+                    this.textInput.value = '';
+                }
+            }
+
+            finalizeText() {
+                const text = this.textInput.value.trim();
+                if (text && this.textInputContainer.style.display === 'block') {
+                    this.annotations.push({
+                        type: 'text', text, color: this.colorPicker.value,
+                        opacity: parseFloat(this.opacitySlider.value),
+                        x: parseInt(this.textInput.dataset.x),
+                        y: parseInt(this.textInput.dataset.y)
+                    });
+                    this.saveState();
+                    this.redrawCanvas();
+                }
+                this.textInputContainer.style.display = 'none';
+                this.textInput.value = '';
+            }
+
+            saveState() {
+                this.historyStep++;
+                if (this.historyStep < this.history.length) {
+                    this.history.length = this.historyStep;
+                }
+                this.history.push(JSON.parse(JSON.stringify(this.annotations)));
+            }
+
+            undo() {
+                if (this.historyStep > 0) {
+                    this.historyStep--;
+                    this.annotations = JSON.parse(JSON.stringify(this.history[this.historyStep]));
+                    this.redrawCanvas();
+                }
+            }
+
+            redo() {
+                if (this.historyStep < this.history.length - 1) {
+                    this.historyStep++;
+                    this.annotations = JSON.parse(JSON.stringify(this.history[this.historyStep]));
+                    this.redrawCanvas();
+                }
+            }
+
+            isPointInTextBounds(point, annotation) {
+                this.ctx.font = 'bold 20px Inter';
+                const textWidth = this.ctx.measureText(annotation.text).width;
+                const textHeight = 24;
+                return (point.x >= annotation.x - 5 && point.x <= annotation.x + textWidth + 5 && 
+                        point.y >= annotation.y - 5 && point.y <= annotation.y + textHeight + 5);
+            }
+
+            redrawCanvas() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (this.image) {
+                    const { x, y, width, height } = this.getImagePlacement();
+                    this.ctx.drawImage(this.image, x, y, width, height);
+
+                    this.annotations.forEach(ann => {
+                        this.ctx.globalAlpha = ann.opacity || 1;
+                        this.ctx.strokeStyle = ann.color;
+                        this.ctx.fillStyle = ann.color;
+                        this.ctx.lineWidth = ann.lineWidth || 3;
+                        this.ctx.lineCap = 'round';
+                        this.ctx.lineJoin = 'round';
+                        this.ctx.setLineDash([]);
+                        
+                        switch (ann.type) {
+                            case 'arrow':
+                                this.drawArrow(ann.startX, ann.startY, ann.endX, ann.endY);
+                                break;
+                            case 'curved-arrow':
+                                this.drawCurvedArrow(ann.points);
+                                break;
+                            case 'pencil':
+                                this.drawPencilPath(ann.points);
+                                break;
+                            case 'circle':
+                                this.drawCircleAnnotation(ann);
+                                break;
+                            case 'text':
+                                this.drawText(ann);
+                                break;
+                        }
+                    });
+                    
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+
+            getImagePlacement() {
+                const canvasRatio = this.canvas.width / this.canvas.height;
+                const imageRatio = this.image.width / this.image.height;
+                let drawWidth, drawHeight, drawX, drawY;
+
+                if (canvasRatio > imageRatio) {
+                    drawHeight = this.canvas.height;
+                    drawWidth = this.image.width * (this.canvas.height / this.image.height);
+                    drawX = (this.canvas.width - drawWidth) / 2;
+                    drawY = 0;
+                } else {
+                    drawWidth = this.canvas.width;
+                    drawHeight = this.image.height * (this.canvas.width / this.image.width);
+                    drawX = 0;
+                    drawY = (this.canvas.height - drawHeight) / 2;
+                }
+                return { x: drawX, y: drawY, width: drawWidth, height: drawHeight };
+            }
+
+            drawArrow(fromX, fromY, toX, toY) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(fromX, fromY);
+                this.ctx.lineTo(toX, toY);
+                this.ctx.stroke();
+                this.drawArrowhead(fromX, fromY, toX, toY);
+            }
+
+            drawCurvedArrow(points) {
+                if (points.length < 2) return;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(points[0].x, points[0].y);
+                
+                for (let i = 1; i < points.length - 1; i++) {
+                    const cpx = (points[i].x + points[i + 1].x) / 2;
+                    const cpy = (points[i].y + points[i + 1].y) / 2;
+                    this.ctx.quadraticCurveTo(points[i].x, points[i].y, cpx, cpy);
+                }
+                
+                if (points.length > 1) {
+                    this.ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+                }
+                
+                this.ctx.stroke();
+            }
+
+            drawTemporaryCurvedArrow(points, color, lineWidth, opacity) {
+                if (points.length < 2) return;
+                
+                this.ctx.globalAlpha = opacity;
+                this.ctx.strokeStyle = color;
+                this.ctx.lineWidth = lineWidth;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(points[0].x, points[0].y);
+                
+                for (let i = 1; i < points.length - 1; i++) {
+                    const cpx = (points[i].x + points[i + 1].x) / 2;
+                    const cpy = (points[i].y + points[i + 1].y) / 2;
+                    this.ctx.quadraticCurveTo(points[i].x, points[i].y, cpx, cpy);
+                }
+                
+                if (points.length > 1) {
+                    this.ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+                }
+                
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1;
+            }
+
+            drawPencilPath(points) {
+                if (!points || points.length < 2) return;
+                this.ctx.beginPath();
+                this.ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    this.ctx.lineTo(points[i].x, points[i].y);
+                }
+                this.ctx.stroke();
+            }
+
+            drawCircle(centerX, centerY, edgeX, edgeY) {
+                const radius = Math.hypot(edgeX - centerX, edgeY - centerY);
+                this.ctx.beginPath();
+                this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                this.ctx.stroke();
+            }
+
+            drawCircleAnnotation(ann) {
+                this.ctx.beginPath();
+                this.ctx.arc(ann.centerX, ann.centerY, ann.radius, 0, 2 * Math.PI);
+                this.ctx.stroke();
+            }
+
+            drawText(ann) {
+                this.ctx.font = 'bold 20px Inter';
+                this.ctx.textBaseline = 'top';
+                this.ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                this.ctx.shadowOffsetX = 2;
+                this.ctx.shadowOffsetY = 2;
+                this.ctx.shadowBlur = 4;
+                this.ctx.fillText(ann.text, ann.x, ann.y);
+                this.ctx.shadowBlur = 0;
+                this.ctx.shadowOffsetX = 0;
+                this.ctx.shadowOffsetY = 0;
+                
+                if (this.selectedAnnotation === ann) {
+                    const textWidth = this.ctx.measureText(ann.text).width;
+                    this.ctx.globalAlpha = 0.3;
+                    this.ctx.strokeStyle = '#6366f1';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.setLineDash([8, 4]);
+                    this.ctx.strokeRect(ann.x - 6, ann.y - 6, textWidth + 12, 32);
+                    this.ctx.setLineDash([]);
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+
+            drawArrowhead(fromX, fromY, toX, toY) {
+                const headlen = 20;
+                const dx = toX - fromX;
+                const dy = toY - fromY;
+                const angle = Math.atan2(dy, dx);
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(toX, toY);
+                this.ctx.lineTo(
+                    toX - headlen * Math.cos(angle - Math.PI / 6),
+                    toY - headlen * Math.sin(angle - Math.PI / 6)
+                );
+                this.ctx.moveTo(toX, toY);
+                this.ctx.lineTo(
+                    toX - headlen * Math.cos(angle + Math.PI / 6),
+                    toY - headlen * Math.sin(angle + Math.PI / 6)
+                );
+                this.ctx.stroke();
+                
+                // Fill arrowhead
+                this.ctx.beginPath();
+                this.ctx.moveTo(toX, toY);
+                this.ctx.lineTo(
+                    toX - headlen * Math.cos(angle - Math.PI / 6),
+                    toY - headlen * Math.sin(angle - Math.PI / 6)
+                );
+                this.ctx.lineTo(
+                    toX - headlen * Math.cos(angle + Math.PI / 6),
+                    toY - headlen * Math.sin(angle + Math.PI / 6)
+                );
+                this.ctx.closePath();
+                this.ctx.fill();
+            }
+
+            getMousePos(evt) {
+                const rect = this.canvas.getBoundingClientRect();
+                return { 
+                    x: evt.clientX - rect.left, 
+                    y: evt.clientY - rect.top 
+                };
+            }
+
+            exportImage() {
+                if (!this.image) {
+                    const errorMsg = 'Please upload an image first.';
+                    console.error(errorMsg);
+                    this.showNotification(errorMsg, true);
+                    return;
+                }
+
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                const scale = 2;
+                tempCanvas.width = this.canvas.width * scale;
+                tempCanvas.height = this.canvas.height * scale;
+                tempCtx.scale(scale, scale);
+                
+                const originalCanvas = this.canvas;
+                const originalCtx = this.ctx;
+                
+                this.canvas = tempCanvas;
+                this.ctx = tempCtx;
+                this.redrawCanvas();
+                
+                tempCanvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `veo3-annotation-${Date.now()}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.canvas = originalCanvas;
+                    this.ctx = originalCtx;
+                }, 'image/png', 1.0);
+            }
+            
+            copyJsonToClipboard() {
+                const jsonText = this.jsonOutput.textContent;
+                const textArea = document.createElement('textarea');
+                textArea.value = jsonText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                const originalText = this.copyJsonBtn.textContent;
+                this.copyJsonBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    this.copyJsonBtn.textContent = originalText;
+                }, 2000);
+            }
+
+            async generateTextPrompt() {
+                const apiKey = "AIzaSyCyeU8EGzqt3UyMB5nZaIj1MCUcfh5f-BU";
+
+                const userInput = this.aiPromptInput.value.trim();
+                if (!userInput) {
+                    this.showNotification("Please describe the animation you want to generate.", true);
+                    return;
+                }
+
+                this.generateBtnText.classList.add('hidden');
+                this.generateLoader.classList.remove('hidden');
+                this.generatePromptBtn.disabled = true;
+
+                const systemPrompt = `You are an expert prompt engineer for an advanced text-to-video AI model like Google's Veo 3. Based on the user's simple request, generate a detailed, structured JSON prompt following the provided comprehensive schema. Fill in all fields creatively and cinematically in English. The user has uploaded an image which will be used alongside this text prompt, so you don't need to describe the static elements of the image, only the action and desired aesthetic.`;
+                
+                let chatHistory = [
+                    { role: "user", parts: [{ text: systemPrompt }, {text: `User's request: "${userInput}"`}] }
+                ];
+
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "shot": { 
+                                    type: "OBJECT",
+                                    properties: {
+                                        "composition": { "type": "STRING", "description": "Description of the framing and composition. E.g., Starts with a close-up and opens to a wide shot." },
+                                        "camera_motion": { "type": "STRING", "description": "Description of the camera movement. E.g., Slow lateral tracking shot, dolly zoom, shaky handheld camera." },
+                                        "frame_rate": { "type": "STRING", "description": "Desired frame rate. E.g., 24fps (cinematic), 60fps (smooth/sports), 120fps (slow motion)." },
+                                        "film_grain": { "type": "STRING", "description": "Visual texture of the image. E.g., Clean 4K digital, 16mm film grain, vintage Super 8 look." }
+                                    }
+                                },
+                                "subject": {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "description": { "type": "STRING", "description": "Detailed description of the main subject(s), including their action, expression, and emotion." },
+                                        "wardrobe": { "type": "STRING", "description": "Specific description of clothing and accessories." }
+                                    }
+                                },
+                                "scene": {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "location": { "type": "STRING", "description": "Specific place where the action occurs. E.g., An old, dusty library, a desert landscape on Mars." },
+                                        "time_of_day": { "type": "STRING", "description": "Time of day. E.g., Dawn, midday, magical golden hour, neon-lit night." },
+                                        "environment_details": { "type": "STRING", "description": "Interactive or atmospheric details of the environment. E.g., Dense fog, torrential rain, dry leaves blowing in the wind." }
+                                    }
+                                },
+                                "visual_details": { "type": "STRING", "description": "List of key visual details to emphasize. E.g., Reflections on water, steam rising from a cup, anamorphic lens flares." },
+                                "cinematography": {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "lighting": { "type": "STRING", "description": "Description of the lighting scheme. E.g., Soft, diffused light on a cloudy day, dramatic backlighting, flickering candlelight." },
+                                        "tone": { "type": "STRING", "description": "Emotional tone and atmosphere. E.g., Melancholic and dreamlike, energetic and suspenseful, cheerful and nostalgic." },
+                                        "style": { "type": "STRING", "description": "Visual style or artistic reference. E.g., In the style of Wes Anderson, 80s sci-fi look, BBC nature documentary." }
+                                    }
+                                },
+                                "audio": {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "ambient_sounds": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                        "music": { "type": "STRING", "description": "Description of the musical style or soundtrack. E.g., A melancholic piano solo, a powerful retro synth beat." },
+                                        "effects": { "type": "STRING", "description": "Sound effects or audio processing. E.g., Reverb matching cave acoustics, crisp footstep sounds." }
+                                    }
+                                },
+                                "color_palette": { "type": "STRING", "description": "Description of the dominant color palette. E.g., Desaturated earth tones, pastel colors, black and white monochrome." },
+                                "dialogue": { "type": "STRING", "description": "Any dialogue spoken in the scene." },
+                                "visual_rules": {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "prohibited_elements": { "type": "ARRAY", "items": { "type": "STRING" } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        let errorDetails = `API request failed: ${response.status}`;
+                        try {
+                            const errorData = await response.json();
+                            errorDetails += ` - ${errorData.error.message || 'Unknown error'}`;
+                        } catch (e) {
+                           // Ignore if response body is not JSON
+                        }
+                        throw new Error(errorDetails);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        const jsonText = result.candidates[0].content.parts[0].text;
+                        const generatedPrompt = JSON.parse(jsonText);
+                        
+                        this.jsonOutput.textContent = JSON.stringify(generatedPrompt, null, 2);
+                        this.jsonPromptModal.classList.remove('hidden');
+                        this.showNotification("Prompt generated successfully!", false);
+
+                    } else {
+                        throw new Error("Invalid response structure from API.");
+                    }
+
+                } catch (error) {
+                    console.error("Error generating AI prompt:", error);
+                    this.showNotification(`${error.message}`, true);
+                } finally {
+                    this.generateBtnText.classList.remove('hidden');
+                    this.generateLoader.classList.add('hidden');
+                    this.generatePromptBtn.disabled = false;
+                }
+            }
+
+            toggleTheme() {
+                document.documentElement.classList.toggle('dark');
+                document.documentElement.classList.toggle('light');
+                this.updateTheme();
+            }
+
+            updateTheme() {
+                if (!document.documentElement.classList.contains('light')) {
+                     document.documentElement.classList.add('dark');
+                }
+                const isDark = document.documentElement.classList.contains('dark');
+                document.getElementById('theme-icon-light').classList.toggle('hidden', isDark);
+                document.getElementById('theme-icon-dark').classList.toggle('hidden', !isDark);
+            }
+
+            showNotification(message, isError = true) {
+                const notif = document.createElement('div');
+                notif.className = 'notification';
+                if (isError) {
+                    notif.classList.add('error');
+                }
+                notif.textContent = message;
+                
+                this.notificationContainer.appendChild(notif);
+
+                // Trigger the animation
+                setTimeout(() => {
+                    notif.classList.add('show');
+                }, 10);
+
+                // Remove after some time
+                setTimeout(() => {
+                    notif.classList.remove('show');
+                    notif.addEventListener('transitionend', () => {
+                        if (notif.parentElement) {
+                            notif.remove();
+                        }
+                    });
+                }, 5000);
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new AnnotationStudio();
+        });
+    </script>
+</body>
+</html>
