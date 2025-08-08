@@ -123,7 +123,6 @@
         }
 
         #canvas {
-            cursor: crosshair;
             border-radius: 12px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
@@ -349,26 +348,26 @@
                         <!-- Drawing Tools -->
                         <div class="control-group">
                             <button class="tool-button p-3 rounded-lg" data-tool="arrow" title="Straight Arrow (A)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                             </button>
                             <button class="tool-button p-3 rounded-lg" data-tool="pencil" title="Freehand Line (D)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                             </button>
                             <button class="tool-button p-3 rounded-lg" data-tool="text" title="Add Text (T)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             </button>
                             <button class="tool-button p-3 rounded-lg" data-tool="circle" title="Circle (C)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
                             </button>
                         </div>
 
                         <!-- Action Tools -->
                         <div class="control-group">
                             <button class="tool-button p-3 rounded-lg" data-tool="undo" title="Undo (Ctrl+Z)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 12"/><path d="M3 3v6h6"/></svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 12"/><path d="M3 3v6h6"/></svg>
                             </button>
                             <button class="tool-button p-3 rounded-lg" data-tool="redo" title="Redo (Ctrl+Y)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 12"/><path d="M21 3v6h-6"/></svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 12"/><path d="M21 3v6h-6"/></svg>
                             </button>
                         </div>
                     </div>
@@ -421,9 +420,10 @@
                 <div id="text-input-container">
                     <input type="text" id="text-input" placeholder="Type your text..." />
                 </div>
+                <!-- *** CHANGE: Replaced placeholder SVG with styled text *** -->
                 <div id="placeholder" class="text-center p-12 flex flex-col items-center justify-center">
-                    <div class="placeholder-icon w-32 h-32 text-gray-400 dark:text-gray-500 mb-8">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l-4-4 4-4"/><path d="M14 7l4 4-4 4"/><path d="M20 20H4"/></svg>
+                    <div class="mb-8">
+                        <h3 class="text-5xl font-bold text-[var(--text-color)] opacity-50 tracking-widest">By ParanoIAd</h3>
                     </div>
                     <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-[var(--accent-color)] to-[var(--accent-hover)] bg-clip-text text-transparent">
                         Create Your Animation Prompts
@@ -520,7 +520,7 @@
                         </p>
                         <div class="flex justify-center gap-4">
                             <span class="text-xs bg-gradient-to-r from-[var(--accent-color)] to-[var(--accent-hover)] text-[var(--bg-color)] px-3 py-1 rounded-full font-medium text-shadow-none">
-                                v3.0-hacker
+                                v3.2-fixed
                             </span>
                             <span class="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full">
                                 Optimized for Veo 3
@@ -808,11 +808,11 @@
                 
                 const cursors = {
                     'arrow': 'crosshair',
-                    'pencil': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300ff00' stroke-width='2'%3E%3Cpath d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3C/svg%3E") 12 12, crosshair`,
+                    'pencil': 'crosshair',
                     'text': 'text',
                     'circle': 'crosshair'
                 };
-                this.canvas.style.cursor = cursors[tool] || 'crosshair';
+                this.canvas.style.cursor = cursors[tool] || 'default';
             }
 
             startAction(e) {
@@ -893,7 +893,7 @@
                 if (this.isMovingAnnotation) {
                     this.isMovingAnnotation = false;
                     this.selectedAnnotation = null;
-                    this.canvas.style.cursor = this.currentTool === 'text' ? 'text' : 'crosshair';
+                    this.setActiveTool(this.currentTool); // Reset cursor
                     this.saveState();
                 }
 
@@ -932,13 +932,25 @@
                     this.redrawCanvas();
                 }
             }
-
+            
+            // *** FIX: Adjusted text input position to prevent overflow ***
             showTextInput(x, y) {
-                this.textInputContainer.style.left = `${x}px`;
+                const inputWidth = this.textInput.offsetWidth;
+                const canvasWidth = this.canvas.width;
+                let finalX = x;
+
+                // If placing the input at x would make it overflow the canvas,
+                // adjust the position so it appears to the left of the cursor.
+                if (x + inputWidth > canvasWidth) {
+                    finalX = x - inputWidth;
+                }
+
+                this.textInputContainer.style.left = `${finalX}px`;
                 this.textInputContainer.style.top = `${y}px`;
                 this.textInputContainer.style.display = 'block';
                 this.textInput.value = '';
                 this.textInput.focus();
+                // Store the original click coordinates
                 this.textInput.dataset.x = x;
                 this.textInput.dataset.y = y;
             }
@@ -1112,37 +1124,21 @@
             }
 
             drawArrowhead(fromX, fromY, toX, toY) {
-                const headlen = 20;
+                const headlen = this.ctx.lineWidth * 5; // Make arrowhead size relative to line width
                 const dx = toX - fromX;
                 const dy = toY - fromY;
                 const angle = Math.atan2(dy, dx);
                 
+                this.ctx.save();
                 this.ctx.beginPath();
-                this.ctx.moveTo(toX, toY);
-                this.ctx.lineTo(
-                    toX - headlen * Math.cos(angle - Math.PI / 6),
-                    toY - headlen * Math.sin(angle - Math.PI / 6)
-                );
-                this.ctx.moveTo(toX, toY);
-                this.ctx.lineTo(
-                    toX - headlen * Math.cos(angle + Math.PI / 6),
-                    toY - headlen * Math.sin(angle + Math.PI / 6)
-                );
-                this.ctx.stroke();
-                
-                // Fill arrowhead
-                this.ctx.beginPath();
-                this.ctx.moveTo(toX, toY);
-                this.ctx.lineTo(
-                    toX - headlen * Math.cos(angle - Math.PI / 6),
-                    toY - headlen * Math.sin(angle - Math.PI / 6)
-                );
-                this.ctx.lineTo(
-                    toX - headlen * Math.cos(angle + Math.PI / 6),
-                    toY - headlen * Math.sin(angle + Math.PI / 6)
-                );
+                this.ctx.translate(toX, toY);
+                this.ctx.rotate(angle);
+                this.ctx.moveTo(0, 0);
+                this.ctx.lineTo(-headlen, headlen / 2);
+                this.ctx.lineTo(-headlen, -headlen / 2);
                 this.ctx.closePath();
                 this.ctx.fill();
+                this.ctx.restore();
             }
 
             getMousePos(evt) {
@@ -1164,18 +1160,77 @@
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
                 
-                const scale = 2;
-                tempCanvas.width = this.canvas.width * scale;
-                tempCanvas.height = this.canvas.height * scale;
-                tempCtx.scale(scale, scale);
+                tempCanvas.width = this.image.naturalWidth;
+                tempCanvas.height = this.image.naturalHeight;
+
+                tempCtx.drawImage(this.image, 0, 0);
                 
-                const originalCanvas = this.canvas;
-                const originalCtx = this.ctx;
-                
-                this.canvas = tempCanvas;
-                this.ctx = tempCtx;
-                this.redrawCanvas();
-                
+                const placement = this.getImagePlacement();
+                const scaleX = tempCanvas.width / placement.width;
+                const scaleY = tempCanvas.height / placement.height;
+
+                this.annotations.forEach(ann => {
+                    tempCtx.globalAlpha = ann.opacity || 1;
+                    tempCtx.strokeStyle = ann.color;
+                    tempCtx.fillStyle = ann.color;
+                    const scaledLineWidth = (ann.lineWidth || 3) * scaleX;
+                    tempCtx.lineWidth = scaledLineWidth;
+                    tempCtx.lineCap = 'round';
+                    tempCtx.lineJoin = 'round';
+
+                    const drawScaledAnnotation = (annotation) => {
+                        const scalePoint = (p) => ({
+                            x: (p.x - placement.x) * scaleX,
+                            y: (p.y - placement.y) * scaleY
+                        });
+
+                        switch (annotation.type) {
+                            case 'arrow': {
+                                const start = scalePoint({x: annotation.startX, y: annotation.startY});
+                                const end = scalePoint({x: annotation.endX, y: annotation.endY});
+                                this.drawArrowOnContext(tempCtx, start.x, start.y, end.x, end.y);
+                                break;
+                            }
+                            case 'pencil': {
+                                if (!annotation.points || annotation.points.length < 2) return;
+                                tempCtx.beginPath();
+                                const firstPoint = scalePoint(annotation.points[0]);
+                                tempCtx.moveTo(firstPoint.x, firstPoint.y);
+                                for (let i = 1; i < annotation.points.length; i++) {
+                                    const p = scalePoint(annotation.points[i]);
+                                    tempCtx.lineTo(p.x, p.y);
+                                }
+                                tempCtx.stroke();
+                                break;
+                            }
+                            case 'circle': {
+                                const center = scalePoint({x: annotation.centerX, y: annotation.centerY});
+                                const radius = annotation.radius * scaleX;
+                                tempCtx.beginPath();
+                                tempCtx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+                                tempCtx.stroke();
+                                break;
+                            }
+                            case 'text': {
+                                const pos = scalePoint({x: annotation.x, y: annotation.y});
+                                tempCtx.font = `bold ${20 * scaleX}px Fira Code`;
+                                tempCtx.textBaseline = 'top';
+                                tempCtx.shadowColor = 'rgba(0,0,0,0.8)';
+                                tempCtx.shadowOffsetX = 2 * scaleX;
+                                tempCtx.shadowOffsetY = 2 * scaleY;
+                                tempCtx.shadowBlur = 4 * scaleX;
+                                tempCtx.fillText(annotation.text, pos.x, pos.y);
+                                tempCtx.shadowBlur = 0;
+                                tempCtx.shadowOffsetX = 0;
+                                tempCtx.shadowOffsetY = 0;
+                                break;
+                            }
+                        }
+                    };
+                    
+                    drawScaledAnnotation(ann);
+                });
+
                 tempCanvas.toBlob((blob) => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -1185,10 +1240,31 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    
-                    this.canvas = originalCanvas;
-                    this.ctx = originalCtx;
+                    this.showNotification("Image exported successfully!");
                 }, 'image/png', 1.0);
+            }
+
+            drawArrowOnContext(ctx, fromX, fromY, toX, toY) {
+                const headlen = ctx.lineWidth * 5;
+                const dx = toX - fromX;
+                const dy = toY - fromY;
+                const angle = Math.atan2(dy, dx);
+                
+                ctx.beginPath();
+                ctx.moveTo(fromX, fromY);
+                ctx.lineTo(toX, toY);
+                ctx.stroke();
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.translate(toX, toY);
+                ctx.rotate(angle);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-headlen, headlen / 2);
+                ctx.lineTo(-headlen, -headlen / 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
             }
             
             copyJsonToClipboard() {
@@ -1208,7 +1284,12 @@
             }
 
             async generateTextPrompt() {
-                const apiKey = "AIzaSyCyeU8EGzqt3UyMB5nZaIj1MCUcfh5f-BU";
+                const apiKey = "YOUR_API_KEY"; // Replace with your actual key
+
+                if (apiKey === "YOUR_API_KEY") {
+                    this.showNotification("Please replace 'YOUR_API_KEY' in the script with your Google AI API key.", true);
+                    return;
+                }
 
                 const userInput = this.aiPromptInput.value.trim();
                 if (!userInput) {
@@ -1339,7 +1420,7 @@
 
             updateTheme() {
                 if (!document.documentElement.classList.contains('light') && !document.documentElement.classList.contains('dark')) {
-                     document.documentElement.classList.add('dark');
+                         document.documentElement.classList.add('dark');
                 }
                 const isDark = document.documentElement.classList.contains('dark');
                 document.getElementById('theme-icon-light').classList.toggle('hidden', isDark);
